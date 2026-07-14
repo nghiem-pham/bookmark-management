@@ -19,6 +19,8 @@ type healthService struct {
 	instanceID  string
 }
 
+// NewHealthService creates a new HealthService using the given service
+// name and instance ID.
 func NewHealthService(serviceName, instanceID string) HealthService {
 	return &healthService{
 		serviceName: serviceName,
@@ -26,6 +28,8 @@ func NewHealthService(serviceName, instanceID string) HealthService {
 	}
 }
 
+// HealthCheck returns the current health status of the service, including
+// its name and instance ID.
 func (s *healthService) HealthCheck() *HealthCheckResponse {
 	return &HealthCheckResponse{
 		Message:     "OK",

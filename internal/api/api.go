@@ -10,6 +10,8 @@ import (
 	"github.com/nghiem-pham/bookmark-management/internal/service"
 )
 
+// Engine defines the interface for the application server, exposing
+// methods to start the server and handle HTTP requests.
 type Engine interface {
 	Start() error
 	ServeHTTP(w *httptest.ResponseRecorder, req *http.Request)
@@ -20,6 +22,8 @@ type engine struct {
 	cfg *Config
 }
 
+// NewEngine creates a new Engine instance configured with the given Config
+// and registers all application routes.
 func NewEngine(cfg *Config) Engine {
 	e := &engine{
 		app: gin.Default(),

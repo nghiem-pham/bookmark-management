@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,8 +11,6 @@ import (
 	"github.com/nghiem-pham/bookmark-management/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 )
-
-var testErr = errors.New("test error")
 
 func TestHealthHandler(t *testing.T) {
 	t.Parallel()

@@ -16,6 +16,8 @@ type healthHandler struct {
 	healthService service.HealthService
 }
 
+// NewHealthHandler creates a new HealthHandler backed by the given
+// HealthService.
 func NewHealthHandler(healthSvc service.HealthService) HealthHandler {
 	return &healthHandler{
 		healthService: healthSvc,
