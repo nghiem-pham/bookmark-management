@@ -13,6 +13,8 @@ import (
 func TestShortenUrl_ShortenURL(t *testing.T) {
 	t.Parallel()
 
+	ctx := context.Background()
+
 	testCases := []struct {
 		name string
 
@@ -28,7 +30,7 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 
 			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
-				repoMock.On("StoreURL", mock.Anything, mock.AnythingOfType("string"), "https://example.com").
+				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com").
 					Return(nil)
 				return repoMock
 			},
@@ -41,7 +43,7 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 
 			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
-				repoMock.On("StoreURL", mock.Anything, mock.AnythingOfType("string"), "https://example.com").
+				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com").
 					Return(errors.New("redis error"))
 				return repoMock
 			},
@@ -57,7 +59,7 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 			repoMock := tc.setupMockRepo(t)
 			svc := NewShortenUrl(repoMock)
 
-			code, err := svc.ShortenURL(context.Background(), tc.url)
+			code, err := svc.ShortenURL(ctx, tc.url)
 
 			if tc.expectedErr {
 				assert.Error(t, err)

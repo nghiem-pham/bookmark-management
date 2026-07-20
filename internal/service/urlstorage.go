@@ -21,10 +21,15 @@ type shortenUrl struct {
 	repo repository.UrlStorage
 }
 
+// NewShortenUrl creates a ShortenUrl service backed by the given
+// repository.UrlStorage.
 func NewShortenUrl(repo repository.UrlStorage) ShortenUrl {
 	return &shortenUrl{repo: repo}
 }
 
+// ShortenURL generates a random code of length urlCodeLength for url,
+// stores the code-to-url mapping in the repository, and returns the
+// generated code. It returns an error if code generation or storage fails.
 func (s *shortenUrl) ShortenURL(ctx context.Context, url string) (string, error) {
 	// generate key
 	urlCode, err := stringutils.GenerateCode(urlCodeLength)

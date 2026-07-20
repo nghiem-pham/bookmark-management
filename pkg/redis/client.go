@@ -2,6 +2,9 @@ package redis
 
 import "github.com/redis/go-redis/v9"
 
+// NewClient creates a redis.Client using configuration loaded from
+// environment variables prefixed with envPrefix. It returns an error if
+// the configuration cannot be loaded.
 func NewClient(envPrefix string) (*redis.Client, error) {
 	cfg, err := newConfig(envPrefix)
 	if err != nil {
