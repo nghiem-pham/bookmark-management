@@ -5,9 +5,9 @@ import (
 )
 
 type config struct {
-	Address  string `default:"localhost:6379" envconfig:"REDIS_ADDRESS"`
-	Password string `default:"" envconfig:"REDIS_PASSWORD"`
-	DB       int    `default:"0" envconfig:"REDIS_DB"`
+	Address  string `default:"localhost:6379" envconfig:"ADDRESS"`
+	Password string `default:"" envconfig:"PASSWORD"`
+	DB       int    `default:"0" envconfig:"DB"`
 }
 
 func newConfig(envPrefix string) (*config, error) {

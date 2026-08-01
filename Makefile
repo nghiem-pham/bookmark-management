@@ -31,3 +31,9 @@ test:
 	else \
 		echo "✅ Coverage ($$total%) meets threshold ($(COVERAGE_THRESHOLD)%)"; \
 	fi
+
+docker-build:
+	docker build -t bookmark-management .
+
+docker-run:
+	docker run --rm -p 8080:8080 bookmark-management

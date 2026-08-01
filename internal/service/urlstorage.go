@@ -15,7 +15,8 @@ const (
 //
 //go:generate mockery --name ShortenUrl --filename urlstorage.go
 type ShortenUrl interface {
-	ShortenURL(ctx context.Context, url string) (string, error)
+	ShortenURL(ctx context.Context, url string, exp int) (string, error)
+	GetURL(ctx context.Context, code string) (string, error)
 }
 type shortenUrl struct {
 	repo repository.UrlStorage
@@ -30,7 +31,7 @@ func NewShortenUrl(repo repository.UrlStorage) ShortenUrl {
 // ShortenURL generates a random code of length urlCodeLength for url,
 // stores the code-to-url mapping in the repository, and returns the
 // generated code. It returns an error if code generation or storage fails.
-func (s *shortenUrl) ShortenURL(ctx context.Context, url string) (string, error) {
+func (s *shortenUrl) ShortenURL(ctx context.Context, url string, exp int) (string, error) {
 	// generate key
 	urlCode, err := stringutils.GenerateCode(urlCodeLength)
 	if err != nil {
@@ -38,10 +39,16 @@ func (s *shortenUrl) ShortenURL(ctx context.Context, url string) (string, error)
 	}
 
 	// store in repo
-	err = s.repo.StoreURL(ctx, urlCode, url)
+	err = s.repo.StoreURL(ctx, urlCode, url, exp)
 	if err != nil {
 		return "", err
 	}
 
 	return urlCode, nil
+}
+
+// GetURL retrieves the original url for code from the repository. It
+// returns an error if the code does not exist or the read fails.
+func (s *shortenUrl) GetURL(ctx context.Context, code string) (string, error) {
+	return s.repo.GetURL(ctx, code)
 }

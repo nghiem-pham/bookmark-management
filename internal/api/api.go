@@ -7,7 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/nghiem-pham/bookmark-management/internal/handler"
+	"github.com/nghiem-pham/bookmark-management/internal/repository"
 	"github.com/nghiem-pham/bookmark-management/internal/service"
+	redisPkg "github.com/nghiem-pham/bookmark-management/pkg/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 // Engine defines the interface for the application server, exposing
@@ -24,14 +27,19 @@ type engine struct {
 
 // NewEngine creates a new Engine instance configured with the given Config
 // and registers all application routes.
-func NewEngine(cfg *Config) Engine {
+func NewEngine(cfg *Config) (Engine, error) {
+	redisClient, err := redisPkg.NewClient("REDIS")
+	if err != nil {
+		return nil, err
+	}
+
 	e := &engine{
 		app: gin.Default(),
 		cfg: cfg,
 	}
-	e.initRoutes()
+	e.initRoutes(redisClient)
 
-	return e
+	return e, nil
 }
 
 // Start starts the application
@@ -45,9 +53,28 @@ func (e *engine) ServeHTTP(w *httptest.ResponseRecorder, req *http.Request) {
 }
 
 // initRoutes initializes the routes
-func (e *engine) initRoutes() {
+func (e *engine) initRoutes(redisClient *redis.Client) {
 	healthSvc := service.NewHealthService(e.cfg.ServiceName, e.cfg.InstanceID)
 	healthHandler := handler.NewHealthHandler(healthSvc)
-
 	e.app.GET("/health-check", healthHandler.HealthCheck)
+
+	urlStorage := repository.NewUrlStorage(redisClient)
+	shortenUrl := service.NewShortenUrl(urlStorage)
+	e.registerUrlRoutes(shortenUrl)
+}
+
+// initRoutesWithServices initializes routes with injected services
+func (e *engine) initRoutesWithServices(shortenUrl service.ShortenUrl) {
+	healthSvc := service.NewHealthService(e.cfg.ServiceName, e.cfg.InstanceID)
+	healthHandler := handler.NewHealthHandler(healthSvc)
+	e.app.GET("/health-check", healthHandler.HealthCheck)
+
+	e.registerUrlRoutes(shortenUrl)
+}
+
+// registerUrlRoutes registers the url shortening routes
+func (e *engine) registerUrlRoutes(shortenUrl service.ShortenUrl) {
+	urlHandler := handler.NewUrlHandler(shortenUrl)
+	e.app.POST("/v1/links/shorten", urlHandler.Shorten)
+	e.app.GET("/v1/links/redirect/:code", urlHandler.Redirect)
 }

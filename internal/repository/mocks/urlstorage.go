@@ -41,17 +41,17 @@ func (_m *UrlStorage) GetURL(ctx context.Context, code string) (string, error) {
 	return r0, r1
 }
 
-// StoreURL provides a mock function with given fields: ctx, code, url
-func (_m *UrlStorage) StoreURL(ctx context.Context, code string, url string) error {
-	ret := _m.Called(ctx, code, url)
+// StoreURL provides a mock function with given fields: ctx, code, url, exp
+func (_m *UrlStorage) StoreURL(ctx context.Context, code string, url string, exp int) error {
+	ret := _m.Called(ctx, code, url, exp)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StoreURL")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
-		r0 = rf(ctx, code, url)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, int) error); ok {
+		r0 = rf(ctx, code, url, exp)
 	} else {
 		r0 = ret.Error(0)
 	}
