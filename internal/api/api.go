@@ -28,7 +28,7 @@ type engine struct {
 // NewEngine creates a new Engine instance configured with the given Config
 // and registers all application routes.
 func NewEngine(cfg *Config) (Engine, error) {
-	redisClient, err := redisPkg.NewClient("REDIS")
+	redisClient, err := redisPkg.NewClient("URL_STORAGE")
 	if err != nil {
 		return nil, err
 	}

@@ -13,15 +13,13 @@ import (
 func TestShortenUrl_ShortenURL(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-
 	testCases := []struct {
 		name string
 
 		url string
 		exp int
 
-		setupMockRepo func(t *testing.T) *mocks.UrlStorage
+		setupMockRepo func(t *testing.T, ctx context.Context) *mocks.UrlStorage
 
 		expectedErr bool
 	}{
@@ -30,9 +28,9 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 			url:  "https://example.com",
 			exp:  604800,
 
-			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
+			setupMockRepo: func(t *testing.T, ctx context.Context) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
-				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com").
+				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com", 604800).
 					Return(nil)
 				return repoMock
 			},
@@ -44,9 +42,9 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 			url:  "https://example.com",
 			exp:  604800,
 
-			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
+			setupMockRepo: func(t *testing.T, ctx context.Context) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
-				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com").
+				repoMock.On("StoreURL", ctx, mock.AnythingOfType("string"), "https://example.com", 604800).
 					Return(errors.New("redis error"))
 				return repoMock
 			},
@@ -58,8 +56,9 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+			ctx := t.Context()
 
-			repoMock := tc.setupMockRepo(t)
+			repoMock := tc.setupMockRepo(t, ctx)
 			svc := NewShortenUrl(repoMock)
 
 			code, err := svc.ShortenURL(ctx, tc.url, tc.exp)
@@ -78,14 +77,12 @@ func TestShortenUrl_ShortenURL(t *testing.T) {
 func TestShortenUrl_GetURL(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-
 	testCases := []struct {
 		name string
 
 		code string
 
-		setupMockRepo func(t *testing.T) *mocks.UrlStorage
+		setupMockRepo func(t *testing.T, ctx context.Context) *mocks.UrlStorage
 
 		expectedURL string
 		expectedErr bool
@@ -94,7 +91,7 @@ func TestShortenUrl_GetURL(t *testing.T) {
 			name: "success",
 			code: "1234567",
 
-			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
+			setupMockRepo: func(t *testing.T, ctx context.Context) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
 				repoMock.On("GetURL", ctx, "1234567").
 					Return("https://example.com", nil)
@@ -108,7 +105,7 @@ func TestShortenUrl_GetURL(t *testing.T) {
 			name: "repository error",
 			code: "notexist",
 
-			setupMockRepo: func(t *testing.T) *mocks.UrlStorage {
+			setupMockRepo: func(t *testing.T, ctx context.Context) *mocks.UrlStorage {
 				repoMock := mocks.NewUrlStorage(t)
 				repoMock.On("GetURL", ctx, "notexist").
 					Return("", errors.New("redis: nil"))
@@ -123,8 +120,9 @@ func TestShortenUrl_GetURL(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
+			ctx := t.Context()
 
-			repoMock := tc.setupMockRepo(t)
+			repoMock := tc.setupMockRepo(t, ctx)
 			svc := NewShortenUrl(repoMock)
 
 			url, err := svc.GetURL(ctx, tc.code)

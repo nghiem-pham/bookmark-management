@@ -43,11 +43,11 @@ func NewUrlHandler(shortenUrl service.ShortenUrl) UrlHandler {
 func (h *urlHandler) Shorten(c *gin.Context) {
 	var req model.ShortenURLRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 
-	code, err := h.shortenUrl.ShortenURL(c.Request.Context(), req.URL, req.Exp)
+	code, err := h.shortenUrl.ShortenURL(c, req.URL, req.Exp)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to shorten url")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
@@ -71,7 +71,7 @@ func (h *urlHandler) Shorten(c *gin.Context) {
 func (h *urlHandler) Redirect(c *gin.Context) {
 	code := c.Param("code")
 
-	url, err := h.shortenUrl.GetURL(c.Request.Context(), code)
+	url, err := h.shortenUrl.GetURL(c, code)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "link not found"})
