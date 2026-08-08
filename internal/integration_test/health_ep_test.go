@@ -44,7 +44,7 @@ func TestHealthCheckEndpoint(t *testing.T) {
 				InstanceID:  tc.instanceID,
 				AppPort:     "8080",
 			}
-			app := api.NewEngine(cfg)
+			app, err := api.NewEngine(cfg)
 
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodGet, "/health-check", nil)
@@ -53,7 +53,7 @@ func TestHealthCheckEndpoint(t *testing.T) {
 			assert.Equal(t, http.StatusOK, w.Code)
 
 			var resp map[string]string
-			err := json.Unmarshal(w.Body.Bytes(), &resp)
+			err = json.Unmarshal(w.Body.Bytes(), &resp)
 			assert.NoError(t, err)
 			assert.Equal(t, "OK", resp["message"])
 			assert.Equal(t, tc.serviceName, resp["service_name"])

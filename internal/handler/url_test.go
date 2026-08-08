@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -23,7 +22,7 @@ func TestShorten(t *testing.T) {
 		name string
 
 		setupRequest     func(ctx *gin.Context)
-		setupMockService func(ctx context.Context) *mocks.ShortenUrl
+		setupMockService func(ctx *gin.Context) *mocks.ShortenUrl
 
 		expectedStatus   int
 		expectedResponse string
@@ -39,7 +38,7 @@ func TestShorten(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/links/shorten", bytes.NewBuffer(body))
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				serviceMock := mocks.NewShortenUrl(t)
 				serviceMock.On("ShortenURL", ctx, "https://example.com/long/url", 604800).
 					Return("abc1234", nil)
@@ -56,7 +55,7 @@ func TestShorten(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/links/shorten", bytes.NewBuffer([]byte(`{"url":""}`)))
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				return mocks.NewShortenUrl(t)
 			},
 
@@ -73,7 +72,7 @@ func TestShorten(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodPost, "/v1/links/shorten", bytes.NewBuffer(body))
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				serviceMock := mocks.NewShortenUrl(t)
 				serviceMock.On("ShortenURL", ctx, "https://example.com/long/url", 604800).
 					Return("", assert.AnError)
@@ -92,7 +91,7 @@ func TestShorten(t *testing.T) {
 			ctx, _ := gin.CreateTestContext(rec)
 			tc.setupRequest(ctx)
 
-			mockSvc := tc.setupMockService(ctx.Request.Context())
+			mockSvc := tc.setupMockService(ctx)
 			testHandler := NewUrlHandler(mockSvc)
 
 			testHandler.Shorten(ctx)
@@ -112,7 +111,7 @@ func TestRedirect(t *testing.T) {
 		name string
 
 		setupRequest     func(ctx *gin.Context)
-		setupMockService func(ctx context.Context) *mocks.ShortenUrl
+		setupMockService func(ctx *gin.Context) *mocks.ShortenUrl
 
 		expectedStatus int
 		expectedURL    string
@@ -125,7 +124,7 @@ func TestRedirect(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodGet, "/v1/links/redirect/abc1234", nil)
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				serviceMock := mocks.NewShortenUrl(t)
 				serviceMock.On("GetURL", ctx, "abc1234").
 					Return("https://example.com/long/url", nil)
@@ -143,7 +142,7 @@ func TestRedirect(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodGet, "/v1/links/redirect/notfound", nil)
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				serviceMock := mocks.NewShortenUrl(t)
 				serviceMock.On("GetURL", ctx, "notfound").
 					Return("", redis.Nil)
@@ -160,7 +159,7 @@ func TestRedirect(t *testing.T) {
 				ctx.Request = httptest.NewRequest(http.MethodGet, "/v1/links/redirect/abc1234", nil)
 			},
 
-			setupMockService: func(ctx context.Context) *mocks.ShortenUrl {
+			setupMockService: func(ctx *gin.Context) *mocks.ShortenUrl {
 				serviceMock := mocks.NewShortenUrl(t)
 				serviceMock.On("GetURL", ctx, "abc1234").
 					Return("", assert.AnError)
@@ -179,7 +178,7 @@ func TestRedirect(t *testing.T) {
 			ctx, _ := gin.CreateTestContext(rec)
 			tc.setupRequest(ctx)
 
-			mockSvc := tc.setupMockService(ctx.Request.Context())
+			mockSvc := tc.setupMockService(ctx)
 			testHandler := NewUrlHandler(mockSvc)
 
 			testHandler.Redirect(ctx)
