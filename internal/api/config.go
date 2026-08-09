@@ -11,7 +11,7 @@ type Config struct {
 	ServiceName string `envconfig:"SERVICE_NAME" default:"bookmark_service"`
 	InstanceID  string `envconfig:"INSTANCE_ID"`
 	AppPort     string `envconfig:"APP_PORT" default:"8080"`
-	Hostname    string `envconfig:"HOSTNAME"`
+	Hostname    string `envconfig:"APP_HOSTNAME"`
 }
 
 // NewConfig loads configuration values from environment variables and

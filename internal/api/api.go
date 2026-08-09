@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	_ "github.com/nghiem-pham/bookmark-management/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"net/http/httptest"
 
@@ -58,6 +61,7 @@ func (e *engine) initRoutes(redisClient *redis.Client) {
 	healthHandler := handler.NewHealthHandler(healthSvc)
 	e.app.GET("/health-check", healthHandler.HealthCheck)
 
+	e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	urlStorage := repository.NewUrlStorage(redisClient)
 	shortenUrl := service.NewShortenUrl(urlStorage)
 	e.registerUrlRoutes(shortenUrl)
