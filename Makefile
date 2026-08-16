@@ -1,4 +1,4 @@
-.PHONY: run swagger dev-run mock test
+.PHONY: run swagger dev-run mock test docker-build docker-run
 # Run the application
 run:
 	go run cmd/api/main.go
