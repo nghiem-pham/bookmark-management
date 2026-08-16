@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	_ "github.com/nghiem-pham/bookmark-management/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"net/http/httptest"
 
@@ -28,7 +31,7 @@ type engine struct {
 // NewEngine creates a new Engine instance configured with the given Config
 // and registers all application routes.
 func NewEngine(cfg *Config) (Engine, error) {
-	redisClient, err := redisPkg.NewClient("URL_STORAGE")
+	redisClient, err := redisPkg.NewClient("URLSTORAGE")
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +61,7 @@ func (e *engine) initRoutes(redisClient *redis.Client) {
 	healthHandler := handler.NewHealthHandler(healthSvc)
 	e.app.GET("/health-check", healthHandler.HealthCheck)
 
+	e.app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	urlStorage := repository.NewUrlStorage(redisClient)
 	shortenUrl := service.NewShortenUrl(urlStorage)
 	e.registerUrlRoutes(shortenUrl)
